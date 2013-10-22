@@ -10,8 +10,7 @@ public struct Point
     }
     public override String ToString()
     {
-        return
-         String.Format("({0},{1})", x, y);
+        return String.Format("({0},{1})", x, y);
     }
     public void Print()
     {

@@ -6,9 +6,9 @@ class App
     {
         Point p = new Point(7, 3);
         p.Print();
-        Console.WriteLine(p.ToString());
-        Console.WriteLine(p.GetType());
-        Console.WriteLine(p.GetHashCode());
+        Console.WriteLine(p.ToString()); // Redefinido em Point
+        Console.WriteLine(p.GetType()); // box + call
+        Console.WriteLine(p.GetHashCode()); // Herdado de Object
     }
 
 }
