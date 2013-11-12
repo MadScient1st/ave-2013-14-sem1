@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 
 public struct Student
@@ -25,14 +26,12 @@ public struct Student
     }
 }
 
-public class Sorter
+static class App
 {
 
     private static readonly String STUDENTS_FILE = "i41n.txt";
 
-    List<Student> stds = new List<Student>();
-    Random r = new Random();
-
+    
     static IEnumerable<String> WithLines(string path)
     {
         string line;
@@ -47,38 +46,36 @@ public class Sorter
         yield break;
     }
 
-    static Student? toStudent(String line)
+    static Student ToStudent(String line)
     {
-        if (line.StartsWith("#")) return new Nullable<Student>();
         int nr = int.Parse(line.Substring(0, 5));
         String name = line.Substring(6);
-        return new Nullable<Student>(new Student(nr, name));
+        return new Student(nr, name);
     }
 
-    public static Sorter Load()
+    static void Print<T>(this IEnumerable<T> elems) { 
+        foreach(T e in elems){
+            Console.WriteLine(e);
+        }
+    }
+
+    static void Separator()
     {
-        Sorter srt = new Sorter();
-        WithLines(STUDENTS_FILE).Select(toStudent).ToList().ForEach(
-            std => { if (std.HasValue) srt.stds.Add(std.Value); }
-        );
-        return srt;
+        Console.WriteLine("------------------------------------------------");
     }
 
-    public void Print()
-    {
-        stds.ForEach(s => Console.WriteLine(s));
-    }
-
-    public Student Rand()
-    {
-        return stds[r.Next(stds.Count)];
-    }
-}
-
-class App
-{
     static void Main()
     {
-        Sorter.Load().Rand().Print();
+        // WithLines(STUDENTS_FILE).Select(ToStudent).Where(s => s.nr > 36000).Print();
+        // WithLines(STUDENTS_FILE).Select(ToStudent).Where(s => s.name.Contains("Miguel")).Print();
+
+        // Creating an expression tree.
+        Expression<Func<Student, bool>> expr = s => s.nr > 36000;
+
+        // Compiling the expression tree into a delegate.
+        Func<Student, bool> f = expr.Compile();
+
+        WithLines(STUDENTS_FILE).Select(ToStudent).Where(expr).Print();
+
     }
 }

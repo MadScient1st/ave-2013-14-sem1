@@ -17,7 +17,9 @@ public class App
 
         while ((line = file.ReadLine()) != null)
         {
-            Console.WriteLine(line);
+            if(int.Parse(line.Substring(0, 6)) > 37000)
+            // if(line.Contains("Filipe"))
+                Console.WriteLine(line);
         }
 
         file.Dispose();
