@@ -75,7 +75,10 @@ static class App
         // Compiling the expression tree into a delegate.
         Func<Student, bool> f = expr.Compile();
 
-        WithLines(STUDENTS_FILE).Select(ToStudent).Where(expr).Print();
+        WithLines(STUDENTS_FILE)
+            .Select(ToStudent)
+            .Where(expr.Compile())
+            .Print();
 
     }
 }
