@@ -6,7 +6,7 @@ public class Dumper
     public static void DispatchMethods(string path) 
     {
         Assembly a = Assembly.LoadFrom(path);
-        foreach (Type t in a.GetTypes())
+        foreach (Type t in a.GetExportedTypes())
         {
             if(!t.IsAbstract)
             {
