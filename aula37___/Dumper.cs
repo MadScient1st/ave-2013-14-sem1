@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class NameValue
 {
@@ -58,32 +59,40 @@ public class Dumper
         }
         return target;
     }
-}
 
-class Person {
-    public int Nr { get; set; }
-    public string Name { get; set; }
-
-    public override String ToString()
+    public static IEnumerable<Action<String>> Dispatcher(string path)
     {
-        return String.Format("Person( {0}, {1})", Nr, Name);
-    }   
-}
-
-static class App {
-
-    static void Print<T>(this IEnumerable<T> elems)
-    {
-        foreach (T e in elems)
+        Assembly a = Assembly.LoadFrom(path);
+        foreach (Type t in a.GetTypes())
         {
-            Console.WriteLine(e);
+            if (!t.IsAbstract)
+            {
+                Object target = null;
+                foreach (MethodInfo mi in t.GetMethods())
+                {
+                    if (!mi.IsStatic && target == null)
+                    {
+                        target = Activator.CreateInstance(t);
+                    }
+                    // Object[] args = new Object[mi.GetParameters().Length];
+                    // yield return () => mi.Invoke(target, args);
+                    if (mi.GetParameters().Length == 1 && mi.GetParameters()[0].ParameterType == typeof(String))
+                    {
+                        Object refToThis = mi.IsStatic ? null : target;
+                        yield return (Action<String>)Delegate.CreateDelegate(typeof(Action<String>), refToThis, mi);
+                    }
+                }
+            }
         }
     }
+}
+
+class App {
 
     public static void Main()
     {
         // Dumper.PrintMembers("Qry.exe");
-
+        /*
         IEnumerable<NameValue> props = Dumper
             .Members(new { Nr = 761253, Name = "Joao Xavier Baptista" });
 
@@ -91,5 +100,25 @@ static class App {
             
         Person p = Dumper.BindTo<Person>(props);
         Console.WriteLine(p);
+        */
+
+        Dumper.Dispatcher("Handlers.dll").ToList().ForEach( a => a("Ola"));
+
+        // MethodInfo mi = typeof(App).GetMethod("m", new Type[]{typeof(String)});
+        // Action<String> a = (Action<String>)Delegate.CreateDelegate(typeof(Action<String>), null, mi);
+    }
+
+    public void m(String s) { 
+    }
+
+    class Person
+    {
+        public int Nr { get; set; }
+        public string Name { get; set; }
+
+        public override String ToString()
+        {
+            return String.Format("Person( {0}, {1})", Nr, Name);
+        }
     }
 }
